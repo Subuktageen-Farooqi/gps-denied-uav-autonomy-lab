@@ -19,7 +19,7 @@ The interactive 3D view animates the UAV, target, Kalman estimate, detections, p
 
 The Perception Lab runs `.pt`, `.onnx`, or `.engine` models on uploaded images and videos and reports measured latency. Monocular range is explicitly marked unavailable.
 
-![Perception Lab backend and measured latency cards](docs/screenshots/perception_lab_.PNG)
+![Perception Lab backend and measured latency cards](docs/screenshots/perception_lab.PNG)
 
 ## Features
 
