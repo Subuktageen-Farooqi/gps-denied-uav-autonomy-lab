@@ -13,13 +13,13 @@ A simulation-only aerial autonomy portfolio project combining noisy relative per
 
 The interactive 3D view animates the UAV, target, Kalman estimate, detections, predicted position, standoff radius, and randomized obstacles. Altitude is a visualization layer; autonomy dynamics remain 2D.
 
-![Autonomy Lab showing animated pursuit, obstacles, and telemetry](docs/screenshots/autonomy_lab.png)
+![Autonomy Lab showing animated pursuit, obstacles, and telemetry](docs/screenshots/autonomy_lab.PNG)
 
 ### Perception telemetry
 
 The Perception Lab runs `.pt`, `.onnx`, or `.engine` models on uploaded images and videos and reports measured latency. Monocular range is explicitly marked unavailable.
 
-![Perception Lab backend and measured latency cards](docs/screenshots/perception_lab_.png)
+![Perception Lab backend and measured latency cards](docs/screenshots/perception_lab_.PNG)
 
 ## Features
 
