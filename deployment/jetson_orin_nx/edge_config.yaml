@@ -1,0 +1,11 @@
+target: NVIDIA Jetson Orin NX 16GB
+input_size: 640
+batch: 1
+primary_precision: fp16
+power_profile_target_w: [15, 25]
+p95_latency_target_ms: 33.3
+int8:
+  enabled: false
+  requires_representative_calibration: true
+  max_map50_95_drop_points: 2.0
+

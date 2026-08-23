@@ -1,0 +1,7 @@
+ultralytics
+opencv-python
+onnx
+onnxruntime-gpu
+PyYAML
+Pillow
+psutil

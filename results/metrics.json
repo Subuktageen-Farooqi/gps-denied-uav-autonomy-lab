@@ -1,0 +1,13 @@
+{
+  "mean_estimation_error": 0.4195968363114923,
+  "estimation_rmse": 0.4816862617846077,
+  "estimation_error_p95": 0.8661996893432098,
+  "maximum_estimation_error": 1.4668250288881706,
+  "total_uav_travel_distance": 132.0382732024355,
+  "mean_standoff_error": 7.527030821944955,
+  "standoff_rmse": 9.665640170650457,
+  "time_to_first_valid_standoff": 16.499999999999964,
+  "percent_time_inside_standoff_band": 20.833333333333336,
+  "detection_availability": 84.33333333333334,
+  "mean_reacquisition_time": 0.26857142857143207
+}

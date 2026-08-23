@@ -1,0 +1,6 @@
+# Install the NVIDIA JetPack-compatible PyTorch/TorchVision packages first.
+ultralytics
+opencv-python
+PyYAML
+psutil
+
