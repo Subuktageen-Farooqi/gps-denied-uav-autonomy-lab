@@ -42,28 +42,7 @@ The Perception Lab runs `.pt`, `.onnx`, or `.engine` models on uploaded images a
 
 The real-vision and metric-simulation paths are intentionally separate. Bounding-box pixels are never treated as metric coordinates.
 
-```text
-Training / deployment
-
-Labeled UAV dataset → Dataset audit → YOLO fine-tuning → Validation
-                                                       ↓
-                                   best.pt → ONNX → Jetson TensorRT FP16
-
-Vision runtime
-
-Camera frame → YOLO → bbox / class / confidence → ByteTrack
-                                                ↓
-                                  Camera intrinsics → bearing
-                                  Range: unavailable (monocular)
-
-Closed-loop simulation
-
-YOLO evaluation → empirical reliability profile
-                              ↓
-Simulated metric detection → Kalman filter → autonomy FSM
-                                          ↓
-                     predictive standoff goal → A* → UAV simulator
-```
+![architecture](docs/screenshots/architecture.PNG)
 
 Ground-truth target state is restricted to simulator internals, simulated sensor generation, visualization, and evaluation. Autonomy and planning consume only detections and estimated state.
 
