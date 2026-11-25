@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>UAV Sim Lab — header mockup</title>
+  <style>
+    @font-face{font-family:Barlow Condensed;src:url('../../site/uav-sim-lab/assets/barlow-condensed.ttf') format('truetype');font-weight:600 900;font-display:swap}
+    @font-face{font-family:Inter;src:url('../../site/uav-sim-lab/assets/inter.ttf') format('truetype');font-weight:400 700;font-display:swap}
+    @font-face{font-family:IBM Plex Mono;src:url('../../site/uav-sim-lab/assets/ibm-plex-mono.ttf') format('truetype');font-weight:400 500;font-display:swap}
+    :root{color-scheme:dark;--bg:#0d0b09;--ink:#f4efe8;--muted:#a59b91;--faint:#6e655c;--orange:#ff5a2a;--rule:#f4efe833;--display:'Barlow Condensed','Arial Narrow',Impact,sans-serif;--body:Inter,Arial,sans-serif;--mono:'IBM Plex Mono',Consolas,monospace}
+    *,*::before,*::after{box-sizing:border-box;border-radius:0}
+    [hidden]{display:none!important}
+    body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 var(--body);-webkit-font-smoothing:antialiased}
+    button{border:0;background:none;color:inherit;font:inherit;cursor:pointer}
+    button:hover{color:var(--orange)}
+    button:focus-visible{outline:2px solid var(--orange);outline-offset:5px}
+    .header-preview{max-width:1800px;margin:auto;padding:0 38px 24px}
+    .intro{display:grid;grid-template-columns:minmax(0,1fr) 225px;gap:48px;align-items:center;padding:38px 0 34px}
+    h1{font:800 clamp(64px,6.5vw,116px)/.94 var(--display);letter-spacing:-1.5px;margin:0;white-space:nowrap}
+    h1 span{color:var(--orange)}
+    .subtitle{font:400 12px/1.7 var(--mono);letter-spacing:1.3px;text-transform:uppercase;color:var(--muted);margin:17px 0 0}
+    .compute-slot{min-height:89px;display:flex;align-items:center}
+    .compute-card{position:relative;width:100%;padding-right:35px;display:flex;flex-direction:column;gap:5px}
+    .compute-card>span{font:10px/1.7 var(--mono);letter-spacing:1px;color:var(--muted)}
+    .compute-card strong{font:700 33px/1.2 var(--display);white-space:nowrap}
+    .disconnect{position:absolute;right:-5px;top:-6px;width:30px;height:30px;padding:7px;display:grid;place-items:center;color:var(--muted)}
+    .disconnect svg{width:12px;height:12px;stroke:currentColor;stroke-width:1.5;fill:none}
+    .connect{display:flex;align-items:center;gap:10px;border:1px solid var(--rule);padding:12px 15px;font:12px var(--mono);letter-spacing:.5px;white-space:nowrap}
+    .status-square{width:7px;height:7px;display:inline-block;background:var(--faint);flex-shrink:0}
+    .workspace-nav{display:flex;align-items:stretch;gap:7px;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+    .workspace-nav button{position:relative;padding:15px 20px;font:700 19px var(--display);letter-spacing:.6px;color:var(--muted);white-space:nowrap}
+    .workspace-nav button:first-child{padding-left:0;padding-right:25px}
+    .workspace-nav button.active{color:var(--ink)}
+    .workspace-nav button.active::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:3px;background:var(--orange)}
+    .nav-context{margin-left:auto;display:flex;align-items:center;font:11px var(--mono);letter-spacing:1px;color:var(--muted);white-space:nowrap}
+    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+    @media(max-width:1000px){.header-preview{padding:0 24px 24px}.intro{grid-template-columns:minmax(0,1fr) 195px;gap:25px}.workspace-nav{gap:0;overflow-x:auto}.workspace-nav button{font-size:17px;padding:14px}.nav-context{display:none}}
+    @media(max-width:800px){.connect{font-size:9px;padding:11px 10px;gap:7px}}
+    @media(max-width:650px){.header-preview{padding:0 18px 20px}.intro{grid-template-columns:1fr;padding:28px 0 22px;gap:23px}h1{font-size:clamp(58px,15.5vw,86px)}.subtitle{margin-top:13px;max-width:330px}.compute-slot{min-height:77px;max-width:235px}.compute-card strong{font-size:30px}.compute-card>span{font-size:9px}.workspace-nav button{font-size:16px;padding:13px 16px}}
+  </style>
+</head>
+<body>
+  <main class="header-preview" aria-label="Proposed page header">
+    <header class="intro">
+      <div>
+        <h1>UAV SIM LAB<span>.</span></h1>
+        <p class="subtitle">SIMULATION ENVIRONMENT FOR GPS DENIED UAV AUTONOMY</p>
+      </div>
+      <div class="compute-slot" aria-live="polite">
+        <section class="compute-card" id="compute-card" aria-label="Connected compute source — mockup">
+          <span>PERCEPTION COMPUTE</span>
+          <strong id="gpu-name">NVIDIA L40S</strong>
+          <span id="gpu-memory">48 GB · ON DEMAND</span>
+          <button class="disconnect" id="disconnect" type="button" aria-label="Disconnect compute (preview)">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="m3 3 10 10M13 3 3 13"/></svg>
+          </button>
+        </section>
+        <button class="connect" id="connect" type="button" aria-label="Connect compute (preview)" hidden>
+          <span class="status-square" aria-hidden="true"></span>
+          <span>CONNECT COMPUTE</span>
+        </button>
+      </div>
+    </header>
+    <nav class="workspace-nav" aria-label="Lab workspaces">
+      <button class="active" type="button" aria-current="page">MISSION CONTROL</button>
+      <button type="button">PERCEPTION LAB</button>
+      <button type="button">MODEL EVALUATION</button>
+      <button type="button">COMPUTE</button>
+      <button type="button">ARCHITECTURE</button>
+      <span class="nav-context">LAB / UAV-01</span>
+    </nav>
+    <p class="sr-only">Visual mockup only. The connection controls demonstrate the proposed states without contacting a compute source.</p>
+  </main>
+  <script>
+    const card = document.getElementById('compute-card');
+    const connect = document.getElementById('connect');
+    const disconnect = document.getElementById('disconnect');
+    function setConnected(connected) {
+      card.hidden = !connected;
+      connect.hidden = connected;
+    }
+    disconnect.addEventListener('click', () => {setConnected(false); connect.focus();});
+    connect.addEventListener('click', () => {setConnected(true); disconnect.focus();});
+    setConnected(location.hash !== '#disconnected');
+  </script>
+</body>
+</html>

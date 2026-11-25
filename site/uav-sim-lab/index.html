@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0d0b09">
+  <meta name="description" content="GPS-denied UAV autonomy research. Configure reproducible simulations, inspect state estimation, and run on-demand GPU perception.">
+  <title>UAV Sim Lab / Subuk</title>
+  <link rel="stylesheet" href="./styles.css?v=20261125g">
+  <script src="./config.js"></script>
+  <script src="./vendor/plotly.min.js" defer></script>
+  <script type="module" src="./app.js?v=20261125f"></script>
+</head>
+<body>
+  <a class="skip-link" href="#workspace">Skip to workspace</a>
+  <div class="site-wrap">
+    <section class="intro" aria-label="Laboratory introduction">
+      <div><h1>UAV SIM LAB<span>.</span></h1><p class="intro-subtitle">SIMULATION ENVIRONMENT FOR GPS DENIED UAV AUTONOMY</p></div>
+      <div class="compute-slot" aria-live="polite">
+        <section class="hardware-stamp" id="compute-source" aria-label="Connected perception compute" hidden>
+          <span>PERCEPTION COMPUTE</span><strong id="compute-gpu"></strong><span id="compute-vram"></span>
+          <button class="source-disconnect" id="header-disconnect-button" type="button" aria-label="Disconnect compute" title="Disconnect compute"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m3 3 10 10M13 3 3 13"/></svg></button>
+        </section>
+        <button class="connect-button" id="connect-button" type="button"><span class="status-square" aria-hidden="true"></span><span>CONNECT COMPUTE</span></button>
+      </div>
+    </section>
+
+    <nav class="workspace-nav" aria-label="Lab workspaces">
+      <button class="active" data-view="mission" aria-current="page">MISSION CONTROL</button>
+      <button data-view="perception">PERCEPTION LAB</button>
+      <button data-view="evaluation">MODEL EVALUATION</button>
+      <button data-view="edge">EDGE DEPLOYMENT</button>
+      <button data-view="deployment">COMPUTE</button>
+      <button data-view="architecture">ARCHITECTURE</button>
+      <span class="nav-context">LAB / UAV-01</span>
+    </nav>
+
+    <main id="workspace">
+      <div class="notice" id="notice" role="status" hidden></div>
+      <section class="workspace-view" id="view-mission" aria-label="Mission control">
+        <div class="experiment-bar"><div><span class="small-square"></span><strong id="run-source">REFERENCE EXPERIMENT</strong><span id="run-summary">Obstacle Pursuit / Seed 7 / 60 s</span></div><div class="bar-actions"><button form="mission-form" type="submit" id="run-top" class="primary launch-button">RUN SIMULATION</button><button id="history-button" class="text-button">RUN HISTORY</button><button id="export-json" class="text-button">EXPORT EXPERIMENT</button><button id="export-csv" class="text-button">CSV</button></div></div>
+        <div class="metrics-strip">
+          <article><span>ESTIMATION RMSE</span><strong id="metric-error">—</strong><small>Position estimate vs. ground truth</small></article>
+          <article><span>DETECTION AVAILABILITY</span><strong id="metric-availability">—</strong><small>Valid sensor observations</small></article>
+          <article><span>TIME IN STANDOFF BAND</span><strong id="metric-standoff">—</strong><small>Desired range ±1.5 m</small></article>
+          <article><span>UAV TRAVEL</span><strong id="metric-travel">—</strong><small>Distance across the full experiment</small></article>
+        </div>
+
+        <div class="mission-grid">
+          <aside class="configuration panel">
+            <div class="panel-heading"><h2>EXPERIMENT SETUP</h2><span>SEEDED</span></div>
+            <form id="mission-form">
+              <label>Scenario<select name="scenario"><option>Obstacle Pursuit</option><option>Basic Tracking</option><option>Occlusion Stress Test</option><option>Fast Target</option></select></label>
+              <label>Operating mode<select name="mode"><option>Predictive Standoff Pursuit</option><option>GPS-Denied Follow</option></select></label>
+              <div class="field-pair"><label>Duration / s<select name="duration"><option>30</option><option selected>60</option><option>90</option><option>120</option></select></label><label>Random seed<input name="seed" type="number" min="0" max="999999" value="7" required></label></div>
+              <details open><summary>SENSOR & AUTONOMY</summary>
+                <label>Target speed <output>1.46 m/s</output><input name="target_speed" type="range" min="0.5" max="4" step="0.01" value="1.46" data-unit="m/s"></label>
+                <label>Detection probability <output>0.92</output><input name="detection_probability" type="range" min="0.1" max="1" step="0.01" value="0.92"></label>
+                <label>Sensor noise <output>1.0 m</output><input name="sensor_noise" type="range" min="0.1" max="3" step="0.1" value="1" data-unit="m"></label>
+                <label>Standoff <output>8.5 m</output><input name="desired_standoff" type="range" min="5" max="20" step="0.5" value="8.5" data-unit="m"></label>
+                <label>Prediction horizon <output>2 s</output><input name="prediction_horizon" type="range" min="0" max="5" step="0.25" value="2" data-unit="s"></label>
+                <label>UAV speed limit <output>7 m/s</output><input name="uav_max_speed" type="range" min="2" max="12" step="0.5" value="7" data-unit="m/s"></label>
+              </details>
+              <details><summary>ENVIRONMENT</summary>
+                <div class="field-pair"><label>Width / m<input name="width" type="number" min="60" max="180" value="100"></label><label>Depth / m<input name="height" type="number" min="45" max="140" value="70"></label></div>
+                <label class="check"><input name="randomize_obstacles" type="checkbox" checked>Randomized obstacles</label>
+                <div class="field-pair"><label>Obstacle count<input name="obstacle_count" type="number" min="0" max="14" value="6"></label><label>Obstacle seed<input name="obstacle_seed" type="number" min="0" max="999999" value="21"></label></div>
+                <div class="field-pair"><label>Min. size / m<input name="obstacle_min_size" type="number" min="3" max="25" value="5"></label><label>Max. size / m<input name="obstacle_max_size" type="number" min="3" max="25" value="14"></label></div>
+                <label>Max. obstacle height / m<input name="obstacle_max_height" type="number" min="5" max="35" value="18"></label>
+                <div class="field-pair"><label>UAV display / m<input name="uav_altitude" type="number" min="3" max="30" value="12"></label><label>Target display / m<input name="target_altitude" type="number" min="0.5" max="20" step="0.5" value="2"></label></div>
+              </details>
+              <button class="primary run-button" type="submit" id="run-button">RUN SIMULATION<span>CPU / DETERMINISTIC</span></button>
+              <button type="button" class="outline full-width" id="reference-button">LOAD REFERENCE RUN</button>
+              <p class="form-note">Configure a new experiment, then run. Reference replay is available without cloud access.</p>
+            </form>
+          </aside>
+
+          <section class="situation panel" aria-label="Simulation replay">
+            <div class="panel-heading"><h2>SITUATION VIEW</h2><div class="view-switch" role="group" aria-label="Scene dimension"><button class="active" id="mode-2d" aria-pressed="true">2D</button><button id="mode-3d" aria-pressed="false">3D</button></div></div>
+            <div class="scene-meta"><span>LOCAL FRAME / METERS</span><span id="scene-time">T+060.0 s</span></div>
+            <div class="scene-stage"><canvas id="mission-canvas" aria-label="Top-down replay of UAV, target, estimates, and obstacles"></canvas><div id="scene-3d" hidden aria-label="Interactive three-dimensional simulation"></div><div class="scene-loading" id="scene-loading">LOADING EXPERIMENT</div></div>
+            <div class="scene-legend"><span><i class="legend-uav"></i>UAV</span><span><i class="legend-target"></i>Ground truth</span><span><i class="legend-estimate"></i>Estimate</span><span><i class="legend-prediction"></i>Prediction</span><span><i class="legend-obstacle"></i>Obstacle</span></div>
+            <div class="playback"><button id="play-button" class="outline">PLAY</button><button id="rewind-button" class="icon-button" aria-label="Return to beginning">RESET</button><input id="replay-seek" type="range" min="0" max="599" value="599" aria-label="Replay position"><span id="replay-clock">60.0 / 60.0 s</span><select id="replay-speed" aria-label="Playback speed"><option value="1">1×</option><option value="2">2×</option><option value="4">4×</option></select></div>
+            <details class="display-options"><summary>DISPLAY LAYERS</summary><div><label class="check"><input type="checkbox" data-layer="truth" checked>Ground truth</label><label class="check"><input type="checkbox" data-layer="detections" checked>Detections</label><label class="check"><input type="checkbox" data-layer="estimate" checked>Estimate</label><label class="check"><input type="checkbox" data-layer="prediction" checked>Prediction</label><label class="check"><input type="checkbox" data-layer="trails" checked>Trails</label><label class="check"><input type="checkbox" data-layer="standoff" checked>Standoff band</label><label class="check"><input type="checkbox" data-layer="path" checked>Final A* path</label></div></details>
+            <p class="scene-footnote">Altitude is visual only. Autonomy dynamics remain 2D.</p>
+          </section>
+
+          <aside class="telemetry panel" aria-label="Selected frame telemetry">
+            <div class="panel-heading"><h2>TELEMETRY</h2><span>SNAPSHOT</span></div>
+            <div class="state-block"><span>AUTONOMY STATE</span><strong id="telemetry-state">—</strong><p id="telemetry-contact">—</p></div>
+            <div class="confidence-block"><div><span>CONFIDENCE</span><strong id="telemetry-confidence">—</strong></div><div class="confidence-track"><span id="confidence-fill"></span></div></div>
+            <dl class="telemetry-values"><div><dt>Estimated range</dt><dd id="telemetry-range">—</dd></div><div><dt>Bearing</dt><dd id="telemetry-bearing">—</dd></div><div><dt>UAV speed</dt><dd id="telemetry-speed">—</dd></div><div><dt>Uncertainty</dt><dd id="telemetry-uncertainty">—</dd></div><div><dt>Target vx</dt><dd id="telemetry-vx">—</dd></div><div><dt>Target vy</dt><dd id="telemetry-vy">—</dd></div><div><dt>Path nodes</dt><dd id="telemetry-nodes">—</dd></div></dl>
+            <div class="event-section"><h3>STATE TRANSITIONS</h3><ol id="event-log"></ol></div>
+          </aside>
+        </div>
+
+        <section class="analysis panel"><div class="panel-heading"><h2>FLIGHT ANALYSIS</h2><span>FULL EXPERIMENT</span></div><div class="analysis-nav" role="group" aria-label="Analysis chart"><button data-analysis="timeline" class="active">STATE TIMELINE</button><button data-analysis="tracking">ESTIMATION</button><button data-analysis="navigation">RANGE & STANDOFF</button><button data-analysis="comparison">MODE COMPARISON</button></div><div id="analysis-chart" aria-label="Simulation analysis chart"></div><div id="comparison-panel" hidden><p>Run both operating modes with identical environment, sensor settings, and random seeds.</p><button id="compare-button" class="outline">RUN CONTROLLED COMPARISON</button><div id="comparison-results"></div></div></section>
+      </section>
+
+      <section class="workspace-view" id="view-perception" hidden aria-label="Perception lab">
+        <div class="section-intro"><p class="eyebrow">IMAGE-SPACE OBSERVATIONS</p><h2>SEE. DETECT. ESTIMATE<span>.</span></h2><p>Run the UAV detector on an image or clip. GPU inference starts only when you submit media.</p></div>
+        <div class="perception-grid"><form id="perception-form" class="panel media-controls"><div class="panel-heading"><h3>INFERENCE SETUP</h3><span>L40S</span></div><label>Detector model<select id="model-select" name="model_id" required><option value="">Connect compute to select a model</option></select></label><div class="field-pair"><label>Confidence<input name="confidence" type="number" min="0.05" max="0.95" step="0.05" value="0.25"></label><label>IoU<input name="iou" type="number" min="0.1" max="0.9" step="0.05" value="0.55"></label></div><label>Resolution<select name="resolution"><option>320</option><option>480</option><option selected>640</option><option>960</option></select></label><label class="check"><input name="tracking" type="checkbox" checked>ByteTrack for video</label><details><summary>CAMERA CALIBRATION</summary><p class="form-note">Use calibrated intrinsics for meaningful azimuth and elevation.</p><div class="field-pair"><label>fx<input name="fx" type="number" min="1" value="640"></label><label>fy<input name="fy" type="number" min="1" value="640"></label><label>cx<input name="cx" type="number" min="0" value="320"></label><label>cy<input name="cy" type="number" min="0" value="320"></label></div></details><label class="upload-zone" for="media-file"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 22V4m-7 7 7-7 7 7M4 21v7h24v-7"/></svg><strong>CHOOSE IMAGE OR VIDEO</strong><span id="upload-name">JPG, PNG, WEBP, MP4, MOV, AVI · 200 MB max.</span><input id="media-file" name="file" type="file" accept=".jpg,.jpeg,.png,.webp,.mp4,.mov,.avi" required></label><button type="submit" class="primary full-width" id="perception-button">RUN PERCEPTION</button></form><div class="panel perception-output"><div class="panel-heading"><h3>DETECTOR OUTPUT</h3><span>MONOCULAR / BEARING ONLY</span></div><div id="perception-empty" class="empty-state"><span class="crosshair-glyph">⌖</span><h3>AWAITING SENSOR INPUT</h3><p>Choose a model and upload media.<br>Measured results will appear here.</p></div><img id="perception-preview" alt="Annotated detector output" hidden><div id="perception-metrics" class="result-metrics" hidden></div><p class="form-note">Monocular detection provides bearing, not metric range. Videos process up to 300 frames; the final annotated frame is shown.</p></div></div><div class="panel results-table" id="perception-table" hidden></div>
+      </section>
+
+      <section class="workspace-view" id="view-evaluation" hidden aria-label="Model evaluation"><div class="section-intro"><p class="eyebrow">EVIDENCE BEFORE CLAIMS</p><h2>MEASURE WHAT MATTERS<span>.</span></h2><p>Accuracy metrics are loaded from actual labeled model evaluations.</p></div><div id="evaluation-content" class="panel empty-state"><h3>NO EVALUATION LOADED</h3><p>Connect compute to load stored evaluations. Metrics remain unmeasured until validation has been run.</p><button class="outline" data-connect>CONNECT COMPUTE</button></div></section>
+
+      <section class="workspace-view" id="view-edge" hidden aria-label="Edge deployment">
+        <div class="section-intro"><p class="eyebrow">MODEL EXPORT / HARDWARE TARGETS</p><h2>EDGE DEPLOYMENT<span>.</span></h2><p>Inspect trained model artifacts and select a deployment target. Additional hardware is listed for selection; its packaging integration will be added later.</p></div>
+        <div class="edge-grid">
+          <section class="panel edge-target-panel">
+            <div class="panel-heading"><h3>TARGET HARDWARE</h3></div>
+            <div class="edge-target-fields">
+              <label>Deployment target<select id="edge-target">
+                <optgroup label="NVIDIA Jetson">
+                  <option value="jetson-nano">NVIDIA Jetson Nano</option>
+                  <option value="jetson-orin">NVIDIA Jetson Orin</option>
+                  <option value="jetson-orin-nx" selected>NVIDIA Jetson Orin NX 16 GB</option>
+                  <option value="jetson-agx-orin-industrial">NVIDIA Jetson AGX Orin Industrial</option>
+                </optgroup>
+                <optgroup label="Raspberry Pi">
+                  <option value="raspberry-pi-5">Raspberry Pi 5</option>
+                  <option value="raspberry-pi-cm4">Raspberry Pi Compute Module 4 (CM4)</option>
+                  <option value="raspberry-pi-cm5">Raspberry Pi Compute Module 5 (CM5)</option>
+                </optgroup>
+                <optgroup label="Qualcomm Dragonwing">
+                  <option value="qualcomm-qrb5156">Qualcomm Dragonwing QRB5156</option>
+                  <option value="qualcomm-qc-s8550">Qualcomm Dragonwing QC S8550</option>
+                </optgroup>
+                <optgroup label="Vision accelerators">
+                  <option value="hailo-8">Hailo-8 / NPU modules</option>
+                  <option value="luxonis-oak">Luxonis OAK</option>
+                  <option value="google-coral">Google Coral</option>
+                </optgroup>
+                <optgroup label="AMD Xilinx">
+                  <option value="versal-vc1902">AMD Xilinx Versal AI Core VC1902</option>
+                </optgroup>
+              </select></label>
+              <p class="form-note" id="edge-target-note">Existing ONNX / TensorRT command-line workflow.</p>
+            </div>
+          </section>
+          <section class="panel edge-artifacts-panel">
+            <div class="panel-heading"><h3>MODEL ARTIFACTS</h3><span>LAB INVENTORY</span></div>
+            <div id="edge-artifacts"><div class="edge-empty"><p>Connect compute to inspect PyTorch, ONNX, and TensorRT artifacts.</p><button class="outline" data-connect>CONNECT COMPUTE</button></div></div>
+          </section>
+        </div>
+        <section class="panel edge-benchmark-panel"><div class="panel-heading"><h3>TARGET BENCHMARK</h3><span>STORED REPORT</span></div><div id="edge-benchmark"><div class="edge-empty"><h3>NO BENCHMARK LOADED</h3><p>Connect compute to inspect stored device measurements.</p></div></div></section>
+        <section class="panel edge-workflow">
+          <div class="panel-heading"><h3>COMMAND-LINE WORKFLOW</h3><span>EXISTING TOOLS</span></div>
+          <div class="edge-command"><p>Export portable ONNX on your workstation</p><pre><code>python -m deployment.jetson_orin_nx.export_onnx --model path/to/best.pt --imgsz 640 --device cpu</code></pre></div>
+          <div id="edge-jetson-commands">
+            <div class="edge-command"><p>Build TensorRT on the Jetson Orin NX</p><pre><code>python -m deployment.jetson_orin_nx.build_tensorrt --model best.onnx --precision fp16</code></pre></div>
+            <div class="edge-command"><p>Benchmark on the target device</p><pre><code>python -m deployment.jetson_orin_nx.benchmark --model artifacts/edge/jetson_orin_nx/model_fp16.engine --source validation.mp4</code></pre></div>
+            <p class="form-note edge-workflow-note">Build TensorRT engines on the target device. INT8 needs representative calibration data and accuracy validation. Stored benchmark reports appear above after syncing them to lab compute.</p>
+          </div>
+        </section>
+      </section>
+
+      <section class="workspace-view" id="view-deployment" hidden aria-label="Compute runtime"><div class="section-intro"><p class="eyebrow">STATIC INTERFACE / ELASTIC COMPUTE</p><h2>THE RIGHT COMPUTE<span>.</span></h2><p>The interface runs on GitHub Pages. Simulation uses CPU; image and video inference use an on-demand NVIDIA L40S.</p></div><div class="compute-grid"><article class="panel compute-card"><span class="eyebrow">INTERFACE</span><h3>GITHUB PAGES</h3><p>Static HTML, CSS, and JavaScript.<br>Your workspace lives at /uav-sim-lab/.</p><strong>NO GPU REQUIRED</strong></article><article class="panel compute-card"><span class="eyebrow">SIMULATION</span><h3>CPU RUNTIME</h3><p>Validated Python requests.<br>Kalman estimation, FSM, and A* planning.</p><strong>REPRODUCIBLE / SEEDED</strong></article><article class="panel compute-card"><span class="eyebrow">PERCEPTION</span><h3>NVIDIA L40S</h3><p>48 GB VRAM. CUDA inference.<br>Allocated only for submitted media.</p><strong>SCALES TO ZERO</strong></article></div><div class="panel runtime-details"><div class="panel-heading"><h3>RUNTIME CONNECTION</h3><span id="runtime-state">DISCONNECTED</span></div><p id="runtime-details">Connect using your lab access code to inspect the backend.</p><button class="outline" data-connect>CONNECT COMPUTE</button><button id="disconnect-button" class="text-button">DISCONNECT</button></div></section>
+
+      <section class="workspace-view" id="view-architecture" hidden aria-label="System architecture"><div class="section-intro"><p class="eyebrow">A CLEAR SEPARATION OF EVIDENCE</p><h2>FROM SENSING TO ACTION<span>.</span></h2><p>Ground truth stays inside simulator generation, visualization, and evaluation. The autonomy stack consumes observations and estimated state.</p></div><div class="architecture-grid"><article class="panel"><h3>METRIC SIMULATION</h3><ol><li>Seeded world & target motion</li><li>Noisy relative observations</li><li>Constant-velocity Kalman filter</li><li>Confidence-aware autonomy FSM</li><li>Predictive standoff goal</li><li>Inflated-grid A* navigation</li><li>Velocity controller & vehicle</li></ol></article><article class="panel"><h3>REAL PERCEPTION</h3><ol><li>Uploaded camera image or clip</li><li>Custom YOLO on NVIDIA L40S</li><li>Bounding boxes & confidence</li><li>Optional ByteTrack identities</li><li>Calibrated camera intrinsics</li><li>Azimuth & elevation</li><li>Empirical reliability profiles</li></ol></article></div><p class="boundary-note">Bounding-box pixels are never treated as metric world coordinates. This lab uses 2D kinematics and does not control real aircraft.</p></section>
+    </main>
+
+    <footer><span>SUBUK / UAV AUTONOMY RESEARCH</span><span>2D KINEMATICS · SAFE STANDOFF · SIMULATION ONLY</span><a id="source-link" href="https://github.com/subuktageen-farooqi/gps-denied-uav-autonomy-lab" target="_blank" rel="noreferrer">SOURCE CODE</a></footer>
+  </div>
+
+  <dialog id="connect-dialog"><form id="connect-form"><button type="button" class="dialog-close" data-close aria-label="Close connection dialog">×</button><p class="eyebrow">LAB COMPUTE ACCESS</p><h2>CONNECT YOUR LAB<span>.</span></h2><p>The reference replay works offline. Connect to run new experiments, access saved runs, and use GPU perception.</p><label>Lab access code<input id="access-code" type="password" autocomplete="off" required placeholder="Enter your lab access code"></label><p class="form-note">The existing code is stored in your local .env.modal file. It stays in this browser tab and is sent only to the lab API.</p><p id="connect-error" class="error-text" role="alert"></p><button type="submit" id="connect-submit" class="primary full-width">CONNECT COMPUTE</button></form></dialog>
+  <dialog id="history-dialog"><button class="dialog-close" data-close aria-label="Close run history">×</button><p class="eyebrow">PERSISTENT EXPERIMENTS</p><h2>RUN HISTORY<span>.</span></h2><div id="history-content"></div></dialog>
+</body>
+</html>

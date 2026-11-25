@@ -1,0 +1,8 @@
+ultralytics>=8.3,<9
+opencv-python-headless>=4.10,<5
+onnx>=1.16,<2
+onnxruntime-gpu>=1.19,<2
+Pillow>=10,<13
+PyYAML>=6,<7
+psutil>=5.9,<8
+lap>=0.5

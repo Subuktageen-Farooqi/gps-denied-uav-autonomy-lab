@@ -1,4 +1,4 @@
-# GPS-Denied UAV Tracking & Predictive Standoff Pursuit
+# UAV Simulation Lab
 
 **Custom Edge Vision · Kalman Estimation · Confidence-Aware Autonomy · Predictive Standoff · A\* Planning**
 
@@ -7,19 +7,19 @@ A simulation-only aerial autonomy portfolio project combining noisy relative per
 > [!IMPORTANT]
 > This project demonstrates safe-standoff observation in a 2D kinematic simulation. It does not implement terminal interception, collision pursuit, weapon control, or real-aircraft control.
 
-## UI preview
+## Research console
 
-### Autonomy Lab
+Open **[UAV Simulation Lab](https://subuktageen-farooqi.github.io/uav-sim-lab/)**. The front end is served directly by GitHub Pages. There is no iframe or background video. The warm-black, orange interface uses square controls and synchronized replay/telemetry, with separate 2D and 3D views.
 
-The interactive 3D view animates the UAV, target, Kalman estimate, detections, predicted position, standoff radius, and randomized obstacles. Altitude is a visualization layer; autonomy dynamics remain 2D.
+The bundled reference experiment works without signing in. Select **Connect compute**, enter the lab access code from the ignored local `.env.modal` file, and run new simulations, controlled comparisons, saved-run history, or GPU perception. Code is kept in the browser tab's session storage and sent only to the authenticated lab API.
 
-![Autonomy Lab showing animated pursuit, obstacles, and telemetry](docs/screenshots/autonomy_lab.PNG)
+![UAV Simulation Lab with square controls, replay, and telemetry](docs/screenshots/uav_sim_lab.png)
 
-### Perception telemetry
+Simulation runs on CPU. Image/video inference runs on an on-demand **NVIDIA L40S, 48 GB** worker; opening the page or running a simulation does not allocate a GPU. Actual accuracy metrics remain unavailable until a labeled evaluation is stored.
 
-The Perception Lab runs `.pt`, `.onnx`, or `.engine` models on uploaded images and videos and reports measured latency. Monocular range is explicitly marked unavailable.
+The site lives under `/uav-sim-lab/`; no personal front page is designed or replaced. GitHub Pages derives its hostname from the account name. The connected account is `Subuktageen-Farooqi`; `subuk.github.io` requires ownership of the `subuk` account.
 
-![Perception Lab backend and measured latency cards](docs/screenshots/perception_lab.PNG)
+See the [Pages and L40S deployment guide](docs/modal-deployment.md). The current UI source is [site/uav-sim-lab](site/uav-sim-lab), the API is [server/api.py](server/api.py), and the compute definition is [deployment/modal_app.py](deployment/modal_app.py). The older [Streamlit workstation console](app.py) remains available locally.
 
 ## Features
 
@@ -30,13 +30,15 @@ The Perception Lab runs `.pt`, `.onnx`, or `.engine` models on uploaded images a
 - `SEARCH → ACQUIRE → TRACK → PREDICT → REACQUIRE` autonomy FSM
 - GPS-denied following and predictive safe-standoff pursuit
 - Inflated-grid, 8-connected A\* planning without diagonal corner cutting
-- Animated 3D Streamlit visualization and quantitative run analytics
+- GitHub Pages UI with 2D/3D replay, synchronized telemetry, run history, and quantitative analytics
+- Authenticated CPU API with separately allocated NVIDIA L40S perception workers
 - Lazy-loaded Ultralytics detector for image/video inference
 - Optional ByteTrack IDs and calibrated azimuth/elevation observations
 - Dataset auditing, custom YOLO training, validation, and model manifests
 - Actual mAP, precision, recall, F1, confusion matrix, PR curves, and TP/FP/FN examples
 - Empirical YOLO reliability-profile bridge into the metric simulation
 - ONNX export plus Jetson Orin NX TensorRT build and benchmark tools
+- Edge Deployment workspace with artifact readiness, stored benchmark reports, and a hardware target selector; added hardware options are listed only
 
 ## Architecture
 
@@ -58,8 +60,8 @@ Ground-truth target state is restricted to simulator internals, simulated sensor
 ## Quick start: autonomy simulator
 
 ```powershell
-git clone <YOUR_REPOSITORY_URL>
-cd gps-denied-uav-autonomy
+git clone https://github.com/subuktageen-farooqi/gps-denied-uav-autonomy-lab.git
+cd gps-denied-uav-autonomy-lab
 
 py -m venv .venv
 .\.venv\Scripts\Activate.ps1
@@ -67,7 +69,15 @@ python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 ```
 
-Launch the dashboard:
+Preview the current GitHub Pages interface locally (using the configured cloud API):
+
+```powershell
+python -m http.server 8502 --bind 127.0.0.1 --directory site
+```
+
+Open `http://127.0.0.1:8502/uav-sim-lab/`.
+
+Launch the legacy Streamlit workstation dashboard:
 
 ```powershell
 python -m streamlit run app.py
@@ -82,6 +92,7 @@ python main.py
 Run tests:
 
 ```powershell
+python -m pip install -r requirements-dev.txt
 python -m pytest -q
 ```
 
@@ -279,7 +290,9 @@ perception/                 Synthetic, profiled, and YOLO perception
 planning/                   Inflated-grid A* planner
 simulation/                 World, target, vehicle, scenarios, engine
 training/                   Dataset audit, training, evaluation, manifests
-ui/                         Streamlit vision/evaluation sections
+site/uav-sim-lab/           GitHub Pages interface and bundled reference replay
+server/                     Authenticated simulation and GPU perception API
+ui/                         Legacy local Streamlit components
 tests/                      CPU-safe unit and integration tests
 results/                    Reproducible default simulation artifacts
 ```

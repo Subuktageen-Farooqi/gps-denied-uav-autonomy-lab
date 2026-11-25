@@ -29,7 +29,8 @@ def render_perception_lab():
             from PIL import Image,ImageDraw
             from perception.yolo_detector import YoloDetector
             from perception.camera_geometry import CameraIntrinsics,detection_to_bearing
-            detector=YoloDetector(supplied,conf,iou,imgsz,device=0); intrinsics=CameraIntrinsics(fx,fy,cx,cy)
+            import torch
+            detector=YoloDetector(supplied,conf,iou,imgsz,device=0 if torch.cuda.is_available() else "cpu"); intrinsics=CameraIntrinsics(fx,fy,cx,cy)
             if upload.type.startswith("image"):
                 image=Image.open(upload).convert("RGB"); detections=detector.detect(np.asarray(image)); draw=ImageDraw.Draw(image); rows=[]
                 for d in detections:
@@ -40,7 +41,10 @@ def render_perception_lab():
                 from perception.video_pipeline import process_video
                 suffix=Path(upload.name).suffix
                 with tempfile.NamedTemporaryFile(delete=False,suffix=suffix) as handle: handle.write(upload.getbuffer()); source=handle.name
-                frames,table=process_video(source,detector,intrinsics,tracking,max_frames=300)
+                try:
+                    frames,table=process_video(source,detector,intrinsics,tracking,max_frames=300)
+                finally:
+                    Path(source).unlink(missing_ok=True)
                 if frames: st.image(frames[-1][:,:,::-1],caption="Last processed frame",width="stretch")
                 st.dataframe(table,width="stretch"); latency=table.get("inference_ms",pd.Series(dtype=float)).dropna()
                 m1,m2,m3,m4=st.columns(4); m1.metric("Backend",detector.metadata()["backend"]); m2.metric("Range","N/A — bearing-only"); m3.metric("p50 latency",f"{latency.quantile(.5):.1f} ms" if len(latency) else "N/A"); m4.metric("p95 latency",f"{latency.quantile(.95):.1f} ms" if len(latency) else "N/A")

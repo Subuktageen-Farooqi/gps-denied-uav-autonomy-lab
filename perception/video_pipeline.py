@@ -24,14 +24,21 @@ def annotate_frame(frame,detections,intrinsics):
     return image
 
 
-def process_video(source,detector,intrinsics,tracking=False,max_frames=None):
+def process_video(source,detector,intrinsics,tracking=False,max_frames=None,retain_frames=True):
     try: import cv2
     except ImportError as exc: raise RuntimeError("OpenCV is required for video inference") from exc
     cap=cv2.VideoCapture(str(source)); fps=cap.get(cv2.CAP_PROP_FPS) or 30.; rows=[]; frames=[]; index=0
-    while cap.isOpened() and (max_frames is None or index<max_frames):
-        ok,frame=cap.read()
-        if not ok: break
-        timestamp=index/fps; detections=detector.track(frame,timestamp) if tracking else detector.detect(frame,timestamp)
-        current=detection_rows(detections,intrinsics,index)
-        rows.extend(current or [dict(frame=index,timestamp=timestamp,detected=False,class_name=None,confidence=0.,x1=None,y1=None,x2=None,y2=None,center_x=None,center_y=None,track_id=None,azimuth_deg=None,elevation_deg=None,inference_ms=detector.last_inference_ms)]); frames.append(annotate_frame(frame,detections,intrinsics)); index+=1
-    cap.release(); return frames,pd.DataFrame(rows)
+    try:
+        while cap.isOpened() and (max_frames is None or index<max_frames):
+            ok,frame=cap.read()
+            if not ok: break
+            timestamp=index/fps; detections=detector.track(frame,timestamp) if tracking else detector.detect(frame,timestamp)
+            current=detection_rows(detections,intrinsics,index)
+            rows.extend(current or [dict(frame=index,timestamp=timestamp,detected=False,class_name=None,confidence=0.,x1=None,y1=None,x2=None,y2=None,center_x=None,center_y=None,track_id=None,azimuth_deg=None,elevation_deg=None,inference_ms=detector.last_inference_ms)])
+            annotated=annotate_frame(frame,detections,intrinsics)
+            if retain_frames: frames.append(annotated)
+            else: frames[:]=[annotated]
+            index+=1
+    finally:
+        cap.release()
+    return frames,pd.DataFrame(rows)
